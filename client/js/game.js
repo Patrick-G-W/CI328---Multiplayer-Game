@@ -6,9 +6,12 @@ Game.init = function(){
     game.stage.disableVisibilityChange = true;
 };
 
+var score = 0;
+var pointsText;
+
 Game.preload = function() {
-    game.load.image('sprite', 'assets/coin.png');
-    game.load.image('ball', 'assets/ball.png');
+    game.load.image('sprite', 'assets/player.png');
+    game.load.image('ball', 'assets/coin.png');
 };
 
 Game.create = function(){
@@ -22,41 +25,29 @@ Game.create = function(){
     testKey.onDown.add(Client.sendTest, this);
     
     game.input.onTap.add(Game.getCoordinates, this);
-
+   
     Client.askNewPlayer();
 
     cursors = game.input.keyboard.createCursorKeys();
 
-
-    //points = game.add.group();
-    // points.Game.create(100, 100, 'ball');
-    //     // points.enableBody = true;
-    //     // game.physics.arcade.enable(points);
-
-    //Game.pointSpawner();
-
-
-    if(alreadyspawned == false){
-        Client.socket.emit('position');
-        alreadyspawned=true;
-    }
-    else{
-        console.log("Spawned");
-    }
+    Client.socket.emit('position');
 
 };
 
-Game.pointSpawner = function(x,y){
+Game.pointSpawner = function(x, y){
 
     // var x = Client.socket.emit('position');
     // var y = Client.socket.emit('position');
-
+    console.log(x + y);
+    var points;
     point = game.add.sprite(x+100,y+100,'ball');
     point.enableBody = true;
     game.physics.arcade.enable(point);
     point.body.collideWorldBounds = true;
 
+    var style = {font: "bold 32px Arial", fill: "#fff"};
 
+    pointsText = game.add.text(0, 0, "Score: " + score, style);
 };
 
 
@@ -64,13 +55,6 @@ Game.update = function () {
 
 
     Client.socket.emit("collision");
-    // var hitBall = game.physics.arcade.collide(Game.playerMap, point);
-    // if (hitBall) {
-    //     //point.destroy();
-    //     console.log(Game.pointSpawner());
-    //
-    //
-    // }
 
 
     if(cursors.up.isDown){
@@ -102,13 +86,17 @@ Game.update = function () {
 
 };
 
+//Function for when the player hits a coin
 Game.collision = function(id){
-    game.debug.body(Game.playerMap[id]);
-    game.debug.body(point);
+    // game.debug.body(Game.playerMap[id]);
+    // game.debug.body(point);
     var hitBall = game.physics.arcade.collide(Game.playerMap[id], point);
     if (hitBall) {
         console.log("You hit a ball");
-
+        score++;
+        pointsText.kill();
+        Client.socket.emit('addPoint');
+        pointsText.text = "Score: " + score;
         point.kill();
         Client.socket.emit('position');
     }
@@ -160,9 +148,9 @@ Game.removePlayer = function(id){
 };
 
 Game.render = function(){
-    game.debug.body(Game.playerMap);
-    //game.debug.body(point);
-    game.world.remove(point);
+    // game.debug.body(Game.playerMap);
+    // //game.debug.body(point);
+    // game.world.remove(point);
 
 };
 

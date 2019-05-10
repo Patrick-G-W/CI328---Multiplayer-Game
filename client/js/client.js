@@ -44,6 +44,11 @@ Client.socket.on('allplayers',function(data){
         Game.respawnPlayer(data.id,data.x,data.y);
     });
 
+    /* 
+    *Client request which allows for the playter to be able to perform some action depending on 
+    *what function call was made by the gamer to client.
+    */
+
     Client.socket.on('move_up_from_server', function move_up_from_server_function(id) {
 
         Game.playerMap[id].body.velocity.y = -100;
@@ -79,14 +84,16 @@ Client.socket.on('allplayers',function(data){
 
     });
 
+    // Collision request when a player hits a coin
+
     Client.socket.on('collision', function collision_from_server_function(id) {
         Game.collision(id);
     });
 
+    // Random Spawn request for the coin
+
     Client.socket.on('position',function positionFromSever(x,y){
-
         Game.pointSpawner(x,y);
-
     });
 
  
